@@ -5,6 +5,12 @@ const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
+
+//for authentications 
+const userRoutes = require('./routes/userRoute.js');
+const requireAuth = require('./middleware/requireAuth'); //dashboard security
+
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
@@ -15,8 +21,20 @@ const uri = process.env.MONGO_URL;
 
 const app = express();
 
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:3000', // React frontend
+  credentials: true,
+}));
+app.use(express.json());
+app.use(cookieParser());
+
+// app.use(cors());
 app.use(bodyParser.json());
+
+
+// Routes
+app.use('/api/user', userRoutes); // All auth endpoints will be under /api/user
 
 //for temp data [might delete later]
 // app.get("/addHoldings", async (req, res) => {
@@ -191,12 +209,12 @@ app.use(bodyParser.json());
 // });
 
 //API End-points
-app.get("/allHoldings", async (req, res) => {
+app.get("/allHoldings", requireAuth, async (req, res) => {
   let allHoldings = await HoldingsModel.find({});
   res.json(allHoldings);
 });
 
-app.get("/allPositions", async (req, res) => {
+app.get("/allPositions", requireAuth ,async (req, res) => {
   let allPositions = await PositionsModel.find({});
   res.json(allPositions);
 });
@@ -215,7 +233,7 @@ app.get("/allPositions", async (req, res) => {
 // });
 
 //extra
-app.post("/newOrder", async (req, res) => {
+app.post("/newOrder",requireAuth ,async (req, res) => {
   const { name, qty, price, mode } = req.body;
 
   if (mode === "SELL") {
@@ -238,7 +256,7 @@ app.post("/newOrder", async (req, res) => {
 
 
 //extra to display orders
-app.get("/orders", async (req, res) => {
+app.get("/orders", requireAuth, async (req, res) => {
   const orders = await OrdersModel.find(); // or filter by user
   res.json(orders);
 });
