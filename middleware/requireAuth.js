@@ -10,7 +10,7 @@ const requireAuth = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.TOKEN_KEY);
     req.userId = decoded.id;
     next(); // proceed to the next middleware or controller
   } catch (err) {

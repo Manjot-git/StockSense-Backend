@@ -2,6 +2,14 @@ const User = require("../model/UsersModel");
 const bcrypt = require("bcryptjs");
 const { createSecretToken } = require("../util/secretToken");
 
+//cookie standard
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: process.env.NODE_ENV === "production",
+  maxAge: 24 * 60 * 60 * 1000,
+};
+
 
 //Signup Core Logic
 module.exports.Signup = async (req, res) => {
@@ -18,14 +26,10 @@ module.exports.Signup = async (req, res) => {
 
     const token = createSecretToken(user._id);
 
-    res.cookie("token", token, {
-        httpOnly: true,
-        sameSite: "Lax",
-        secure: process.env.NODE_ENV === "production"
-        });
+    res.cookie("token", token, cookieOptions);
 
 
-    const { password: _, ...safeUser } = user._doc;
+    const { password: _, ...safeUser } = user.toObject();
 
     res.status(201).json({
       message: "User signed in successfully",
@@ -64,13 +68,9 @@ module.exports.Login = async (req, res) => {
     const token = createSecretToken(user._id);
 
     // Send token as cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "None",
-      secure: process.env.NODE_ENV === "production"
-    });
+    res.cookie("token", token, cookieOptions);
 
-    const { password: _, ...safeUser } = user._doc;
+    const { password: _, ...safeUser } = user.toObject();
 
     res.status(200).json({
       message: "Login successful",
@@ -85,11 +85,7 @@ module.exports.Login = async (req, res) => {
 
 // Logout Controller
 module.exports.Logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    sameSite: "Lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  res.clearCookie("token", cookieOptions);
 
   res.status(200).json({ message: "Logged out successfully" });
 };
