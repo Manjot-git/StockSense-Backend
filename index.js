@@ -218,12 +218,12 @@ app.use('/api/user', userRoutes); // All auth endpoints will be under /api/user
 // });
 
 //API End-points
-app.get("/allHoldings", requireAuth, async (req, res) => {
+app.get("/api/allHoldings", requireAuth, async (req, res) => {
   let allHoldings = await HoldingsModel.find({});
   res.json(allHoldings);
 });
 
-app.get("/allPositions", requireAuth ,async (req, res) => {
+app.get("/api/allPositions", requireAuth ,async (req, res) => {
   let allPositions = await PositionsModel.find({});
   res.json(allPositions);
 });
@@ -242,7 +242,7 @@ app.get("/allPositions", requireAuth ,async (req, res) => {
 // });
 
 //extra
-app.post("/newOrder",requireAuth ,async (req, res) => {
+app.post("/api/newOrder",requireAuth ,async (req, res) => {
   const { name, qty, price, mode } = req.body;
 
   if (mode === "SELL") {
@@ -265,7 +265,7 @@ app.post("/newOrder",requireAuth ,async (req, res) => {
 
 
 //extra to display orders
-app.get("/orders", requireAuth, async (req, res) => {
+app.get("/api/orders", requireAuth, async (req, res) => {
   const orders = await OrdersModel.find(); // or filter by user
   res.json(orders);
 });
